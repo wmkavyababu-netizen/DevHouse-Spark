@@ -1,0 +1,3 @@
+# Placeholder for trained AI model weights and export artifacts (e.g. YOLO/U-Net).
+# Structure:
+# storage/models/{version}/

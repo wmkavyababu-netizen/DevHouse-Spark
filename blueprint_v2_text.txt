@@ -1,0 +1,402 @@
+=== PAGE 1 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 1
+ TARANG
+ Platform Page & Content Blueprint
+ v2.0 — Basic Product/UI Understanding Document
+Purpose: This document explains what pages TARANG will have, what each page contains, who can access it, and
+what the user can actually do on that page. It is intentionally different from the formal SRS.
+Architecture: 31 pages across Public, Authentication, Core Application, Administration and Shared areas.
+
+
+=== PAGE 2 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 2
+1. How to Read This Document
+Think of this PDF as the blueprint / table-of-contents guide for the TARANG website and platform. It is not a
+technical requirements specification. The goal is to give the team a quick picture of the complete product before
+development starts.
+For every page, we define:
+ Page name and URL
+ Who can access it
+ Why the page exists
+ Main content/components shown
+ What the user can do
+ What happens after an important action
+Overall product flow: Public awareness → Authentication → Survey upload → SSS preprocessing → AI detection
+→ XAI/physics validation → Geotagging → Duplicate suppression → Expert review → Risk assessment → Cleanup
+planning → Mission execution → Impact/reporting → Retraining.
+
+
+=== PAGE 3 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 3
+2. Complete Table of Contents
+ Section
+Pages
+What it covers
+A. Public
+1–5
+Awareness, public map, citizen reports, education
+B. Authentication
+6–8
+Login, registration, password recovery
+C. Core Application
+9–24
+Survey-to-cleanup operational platform
+D. Administration
+25–28
+Users, organizations, logs, configuration
+E. Shared
+29–31
+Profile, notifications, help/documentation
+Note: The original architecture labels the core area as 15 pages, but the detailed list contains 16 pages (9–24).
+Therefore the complete architecture is 31 pages.
+
+
+=== PAGE 4 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 4
+3. User & Access Map
+ Role
+Main areas
+Primary actions
+Administrator
+Dashboard, Admin, Retraining
+Manage users/orgs, configure system, monitor models/logs
+Survey Operator
+Dashboard, Surveys, Analysis
+Upload surveys, monitor processing, inspect detections
+Marine Expert
+Dashboard, Review, Analysis
+Validate, reject, correct and annotate detections
+Port/Coastal Authority
+Dashboard, Map, Analytics, Reports
+Monitor verified debris, hotspots, risk and cleanup
+Marine NGO
+Dashboard, Map, Missions, Reports
+Select targets, plan and execute cleanup missions
+Researcher
+Dashboard, Analytics, Reports
+Study anonymized historical data and trends
+Access principle: public pages expose awareness and only validated/public-safe information; operational sonar
+data, unvalidated detections, review work, risk data and administration remain role-restricted.
+
+
+=== PAGE 5 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 5
+A. PUBLIC PAGES
+1. Landing Page — /
+Access: Everyone
+What it does: Introduce TARANG and guide visitors toward registration, login, public map or citizen reporting.
+Main content: Hero and problem statement  How TARANG works in 3 steps  Key capabilities and impact metrics 
+Partner/organization area  Get Started, Login, Public Map, Report Debris CTAs
+User actions: Navigate to registration/login  Open public map  Submit a citizen report  Learn about TARANG
+2. About / Technology — /about
+Access: Everyone
+What it does: Explain the mission, technology and complete solution at a high level.
+Main content: Marine debris problem and impact  SSS processing pipeline  AI + segmentation + XAI  Geospatial and security
+technologies  Team/organization/research information
+User actions: Explore technology  Move to Get Started  Open supporting resources
+3. Public Debris Map — /public/map
+Access: Public
+What it does: Show validated debris in a safe, read-only public view.
+Main content: Interactive map  Validated target markers  Class/date filters  Heatmap and safe public layers  Marker popup with
+class, date, validation and thumbnail
+User actions: Search/filter targets  Open public-safe details  Download map image
+4. Citizen Debris Report — /public/report
+Access: Public
+What it does: Collect crowdsourced debris observations for later review.
+Main content: Map/GPS location  Photo upload  Description and observation date  Optional contact details  Submission status and
+safety guidance
+User actions: Submit report  Receive confirmation  Track review status
+5. Educational Resources — /public/learn
+Access: Public
+What it does: Educate users about marine debris and responsible reporting.
+Main content: Debris types and sources  Environmental/economic/social impact  How people can help  Safety tips  Videos, guides
+and quiz
+User actions: Read/watch resources  Take quiz  Register to contribute
+
+
+=== PAGE 6 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 6
+B. AUTHENTICATION PAGES
+6. Login — /login
+Access: Registered users
+What it does: Authenticate users and route them to the appropriate platform area.
+Main content: Email/username  Password  Forgot password  Optional Google/Government SSO  2FA prompt when enabled
+User actions: Authenticate  Complete 2FA  Open role dashboard
+7. Registration — /register
+Access: New users
+What it does: Create a user account and collect organization/role information.
+Main content: Personal details  Organization  Organization type  Role selection  Terms/privacy consent  Email verification and
+approval flow
+User actions: Verify email  Wait for approval where required  Enter platform
+8. Forgot Password — /forgot-password
+Access: Registered users
+What it does: Recover access securely.
+Main content: Email input  Reset-token flow  New password  Confirmation
+User actions: Request reset  Set new password  Return to login
+
+
+=== PAGE 7 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 7
+C. CORE APPLICATION PAGES
+9. Dashboard — /dashboard
+Access: All logged-in roles
+What it does: Provide role-specific overview, KPIs and quick actions.
+Main content: Role-specific statistics  Recent activity  Processing/review/mission status  Quick links  Admin system/model health
+User actions: Open relevant work area  Inspect status  Take quick actions
+10. Surveys List — /surveys
+Access: Survey Operator/Admin
+What it does: Manage uploaded survey records.
+Main content: Survey table  Status/date/operator filters  Sorting/pagination  Detection and validation summaries  Bulk/export actions
+User actions: Open survey  Upload survey  Export/delete where permitted
+11. Upload Survey — /surveys/upload
+Access: Survey Operator
+What it does: Bring SSS data and metadata into TARANG.
+Main content: Drag/drop files  XTF/JSF/HSX/SDF and supported custom input  File validation  Survey metadata  Upload progress
+User actions: Validate files  Upload  Create processing job
+12. Processing Status — /surveys/{id}/status
+Access: Survey Operator/Admin
+What it does: Show live progress through the processing pipeline.
+Main content: Stage-by-stage status  Frame progress  Estimated time  Quality flags  Cancel option
+User actions: Monitor processing  Cancel job if allowed  Open completed survey
+13. Survey Details — /surveys/{id}
+Access: Survey Operator/Admin/authorized roles
+What it does: Summarize survey metadata and AI results.
+Main content: Survey metadata  Processing summary  Class/confidence/validation/risk summaries  Related surveys  Action buttons
+User actions: Open analysis  Open map  Generate report  Send to review
+14. AI Analysis Workspace — /surveys/{id}/analysis
+Access: Authorized operational users
+What it does: Inspect detections in detail.
+Main content: Original vs preprocessed SSS  AI overlays  Detection gallery  Confidence/location/depth/dimensions  XAI and physics
+evidence  Export filters
+User actions: Inspect detection  Export  Send selected detections to review
+15. Marine Review Portal — /review/{detection_id}
+Access: Marine Expert
+What it does: Allow expert validation of an AI detection.
+Main content: SSS views and overlays  AI/XAI/physics evidence  Detection metadata  Accept/reject/correct/unknown  Comments
+and keyboard shortcuts  Review progress
+User actions: Validate  Reject  Correct class  Mark unknown  Store feedback for retraining
+
+
+=== PAGE 8 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 8
+16. Review Queue — /review/queue
+Access: Marine Expert/Admin
+What it does: Organize all pending expert reviews.
+Main content: Queue table  Risk/confidence/class filters  Assignment  Priority ordering  Pagination and bulk actions
+User actions: Start review  Assign detections  Process queue
+17. Target Registry — /targets
+Access: Authorized users
+What it does: Represent unique physical objects after duplicate suppression.
+Main content: Unique target IDs  Aggregated confidence  Location/depth/risk  Validation status  Detection count  Filters/export
+User actions: Open target  Filter targets  Export  Send for review
+18. Target Details — /targets/{id}
+Access: Authorized users
+What it does: Show the complete evidence and status of one unique target.
+Main content: Best frame and processed views  AI/XAI/physics evidence  Location uncertainty  Review information  Risk/cleanup
+priority  Duplicate group and nearby targets
+User actions: Edit review if permitted  Export  Add to cleanup mission
+19. Interactive Map — /map
+Access: Authorized users
+What it does: Visualize surveys, targets, risks and spatial patterns.
+Main content: Target markers/clustering  Satellite/bathymetry/survey tracks  Heatmap/hotspots  Time slider  Measurement tools 
+Filters and GeoJSON export
+User actions: Search  Filter  Inspect target  Create cleanup mission
+20. Cleanup Mission Planner — /missions/{id}
+Access: Marine NGO/authorized authority
+What it does: Plan, execute and close cleanup operations.
+Main content: Target selection  Route planning  Currents/tides/weather inputs where available  Resources/team/safety  Execution
+progress  Before/after photos  Post-mission summary
+User actions: Create mission  Update progress  Record recovered debris  Complete mission  Generate mission report
+21. Hotspot Analytics — /analytics/hotspots
+Access: Authorities/authorized users
+What it does: Identify and analyze spatial debris concentrations.
+Main content: Hotspot ranking  Risk/count metrics  Type distribution  Trend analysis  Cleanup scenario simulation  GeoJSON
+export
+User actions: Compare hotspots  Simulate cleanup  Export hotspot report
+22. Impact Dashboard — /analytics/impact
+Access: Authorities/authorized users
+What it does: Translate detected and removed debris into environmental, economic and social indicators.
+Main content: Environmental metrics  Economic estimates  Social indicators  SDG mapping  Regional comparisons  Historical
+trends
+User actions: Filter region/time  Review impact  Download report
+
+
+=== PAGE 9 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 9
+23. Reports & Export — /reports
+Access: Authorized users
+What it does: Create decision-ready reports and machine-readable exports.
+Main content: Report builder  Filters and sections  PDF/CSV/Excel/JSON/GeoJSON  Preview  Report history  Decision-support
+recommendations
+User actions: Build report  Preview  Download/export  Share where permitted
+24. Retraining Pipeline — /admin/retraining
+Access: Administrator/ML administrators
+What it does: Turn expert feedback into controlled model improvement.
+Main content: Feedback collection  Dataset versions  Augmentation  Training jobs  Metrics and comparison  Model registry 
+Canary deployment  Monitoring and triggers
+User actions: Create dataset version  Train/evaluate  Approve deployment  Rollback if required
+
+
+=== PAGE 10 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 10
+D. ADMINISTRATION PAGES
+25. User Management — /admin/users
+Access: Administrator
+What it does: Manage accounts, roles, status and activity.
+Main content: User table  Role/org/status filters  Add/edit/suspend/delete  Password reset  Activity history
+User actions: Create/update user  Assign role  Suspend/reactivate  Export
+26. Organization Management — /admin/organizations
+Access: Administrator
+What it does: Manage participating organizations and approvals.
+Main content: Organization table  Type/status filters  User count  Approval workflow  Permissions/activity
+User actions: Approve/reject  Edit/deactivate  Review users
+27. System Logs — /admin/logs
+Access: Administrator
+What it does: Provide an auditable record of platform actions and failures.
+Main content: Timestamp/user/action/resource  IP/user agent  Success/failure  Error details  Search/filter/export  Retention settings
+User actions: Investigate event  Filter logs  Export audit data
+28. Admin Settings — /admin/settings
+Access: Administrator
+What it does: Configure platform, AI, notification, retention, security and API behavior.
+Main content: General settings  AI thresholds/model version  Notifications  Retention  Security/2FA/session/rate limits 
+API/storage/backup settings
+User actions: Change settings  Save  Reset defaults
+
+
+=== PAGE 11 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 11
+E. SHARED PAGES
+29. Profile — /profile
+Access: All logged-in users
+What it does: Let users manage their personal account and preferences.
+Main content: Profile details  Organization/roles  Password and 2FA  Notification preferences  Activity history  API keys where
+permitted
+User actions: Edit profile  Change security settings  Manage API key
+30. Notifications — /notifications
+Access: All logged-in users
+What it does: Centralize system alerts and workflow notifications.
+Main content: Notification list  Type/date/read filters  Action links  Mark read  Notification preferences
+User actions: Open linked work item  Mark read  Configure preferences
+31. Help / Documentation — /help
+Access: Everyone
+What it does: Provide searchable assistance, technical references and support.
+Main content: FAQ  User guides  Technical/API documentation  SSS format guidance  Video tutorials  Best practices  Support
+tickets  System status
+User actions: Search docs  Submit ticket  Check system status
+
+
+=== PAGE 12 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 12
+4. What Happens Behind the Pages — Core Platform Flow
+The pages are not isolated screens. They form one operational workflow:
+Stage
+Main page
+What happens
+1. Ingest
+Upload Survey
+Files + metadata enter TARANG; originals remain traceable.
+2. Prepare
+Processing Status
+Formats are standardized, synchronized and preprocessed.
+3. Detect
+AI Analysis
+AI generates detection/segmentation results and confidence.
+4. Explain & Validate
+AI Analysis / Review
+XAI and sonar-physics evidence support interpretation.
+5. Locate
+Map / Target Registry
+Detections receive geospatial coordinates and uncertainty.
+6. Fuse
+Target Registry
+Repeated observations are associated into unique physical targets.
+7. Verify
+Marine Review Portal
+Experts accept, reject, correct or mark unknown.
+8. Prioritize
+Hotspots / Impact
+Risk and spatial analytics support decisions.
+9. Act
+Mission Planner
+Verified targets become cleanup missions.
+10. Measure
+Impact / Reports
+Recovery and impact are recorded and reported.
+11. Learn
+Retraining
+Expert feedback becomes controlled training data for future models.
+
+
+=== PAGE 13 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 13
+5. Recommended Development Order
+For a practical prototype/hackathon build, the full 31-page architecture can be represented as screens, but not every
+screen needs full production depth initially.
+Phase
+Pages / modules
+Goal
+1 — Foundation
+Landing, Login, Register, Dashboard, Profile
+Working navigation, identity and role-based shell
+2 — SSS workflow
+Surveys, Upload, Processing Status, Survey Details
+End-to-end survey ingestion and processing status
+3 — AI workspace
+AI Analysis, Review Queue, Review Portal, Target
+Registry/Details
+Demonstrate AI + expert validation loop
+4 — Geospatial
+Interactive Map, geotagging, duplicate suppression
+Show real-world target locations and unique targets
+5 — Decision support
+Hotspots, Reports, Risk, Impact
+Turn detections into actionable information
+6 — Cleanup
+Mission Planner + execution tracking
+Close the detection-to-action loop
+7 — Learning
+Retraining Pipeline
+Demonstrate human feedback → model improvement
+8 — Administration
+Users, Organizations, Logs, Settings
+Operational governance and security
+9 — Public
+engagement
+Public Map, Citizen Report, Learn, Help
+Public-facing ecosystem and awareness
+Important: For the SIH/demo version, several pages can initially be lightweight screens or role-based views while the
+strongest technical demonstration focuses on the SSS → preprocessing → AI → physics/XAI → geotagging →
+duplicate suppression → expert validation → target/map workflow.
+
+
+=== PAGE 14 ===
+TARANG — Platform Page & Content Blueprint v2.0
+Page 14
+6. One-Page Mental Model of TARANG
+PUBLIC → Understand TARANG, view safe validated information, report observations.
+OPERATORS → Upload and monitor sonar surveys.
+AI ENGINE → Preprocess → detect → segment → explain → physics-check → geotag → associate duplicates.
+MARINE EXPERTS → Validate AI results and create trusted targets.
+AUTHORITIES → See risks, hotspots, trends and reports.
+NGOs → Convert verified targets into cleanup missions and record recovery.
+RESEARCHERS → Analyze anonymized historical data.
+ADMIN → Govern users, organizations, security, logs and model lifecycle.
+LEARNING LOOP → Expert feedback → curated dataset → retraining → evaluation → controlled deployment →
+monitoring.
+This blueprint is intended to give the UI, frontend, backend, AI and system-research teams the same understanding of
+what each page is for and what it needs to accomplish before detailed implementation.
+
+

@@ -1,0 +1,31 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: tarang-backend-auth
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tarang_db}
+    username: ${SPRING_DATASOURCE_USERNAME:tarang_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:tarang_insecure_dev_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate # Alembic in backend-app is sole schema migration owner
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  key-id: ${JWT_KEY_ID:tarang-dev-key-v1}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+  refresh-expiration-days: ${REFRESH_TOKEN_EXPIRATION_DAYS:30}
+
+logging:
+  level:
+    root: INFO
+    com.tarang.auth: DEBUG

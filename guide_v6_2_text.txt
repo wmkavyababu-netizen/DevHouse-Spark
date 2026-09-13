@@ -1,0 +1,715 @@
+=== PAGE 1 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 1
+ TARANG PLATFORM
+ Final Codebase + PostgreSQL/PostGIS Schema + Implementation Guide
+ Version: v6.2    Status: Implementation Baseline    Database: PostgreSQL 14+ / PostGIS 3.2+
+ Technology for Aquatic Regeneration, Assessment, Navigation & Geotagging
+Purpose
+This document freezes the current TARANG implementation architecture and the supplied v6.2 database schema. It
+explains where code belongs, how the services connect, how the SSS/AI pipeline connects to the platform, what the
+technology stack is, and what the repository README should contain.
+Important: The SQL in the project repository remains the source of truth for the actual database implementation. This guide
+documents the supplied schema; it does not replace the migration file.
+
+
+=== PAGE 2 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 2
+1. Final System Architecture
+TARANG uses three application layers: React for the user interface, Spring Boot as the authentication/identity owner, and
+FastAPI as the application + processing owner. Nginx provides the single public entry point.
+ Browser
+  |
+  v
+React + TypeScript
+  |
+  v
+Nginx / API Gateway
+  |------------------------------|
+  |                              |
+  v                              v
+/api/auth/*                  /api/v1/*
+Spring Boot                  FastAPI
+(Auth + Identity)            (Application + Pipeline)
+  |                              |
+  |                              +--> PostgreSQL + PostGIS
+  |                              +--> Redis
+  |                              +--> Celery Workers
+  |                              +--> File/Object Storage
+  |
+  +--> PostgreSQL
+       (users, roles, refresh tokens, organizations)
+Ownership rule: Spring Boot owns authentication and identity. FastAPI does not create a duplicate user model; it validates
+the JWT and applies authorization to TARANG application resources.
+2. Final Repository Structure
+ tarang-platform/
+■■■ README.md
+■■■ docker-compose.yml
+■■■ .env.example
+■■■ .gitignore
+■■■ Makefile
+■
+■■■ frontend/
+■   ■■■ package.json
+■   ■■■ vite.config.ts
+■   ■■■ tsconfig.json
+■   ■■■ tailwind.config.js
+■   ■■■ index.html
+■   ■■■ src/
+■       ■■■ main.tsx
+■       ■■■ App.tsx
+■       ■■■ vite-env.d.ts
+■       ■■■ config/
+■       ■   ■■■ api.ts
+■       ■   ■■■ routes.ts
+■       ■   ■■■ constants.ts
+■       ■■■ features/
+■       ■   ■■■ surveys/
+■       ■   ■■■ detections/
+■       ■   ■■■ targets/
+■       ■   ■■■ missions/
+■       ■   ■■■ reviews/
+■       ■   ■■■ analytics/
+■       ■■■ components/
+■       ■   ■■■ common/
+■       ■   ■■■ layout/
+■       ■   ■■■ maps/
+■       ■   ■■■ charts/
+■       ■   ■■■ sonar/
+■       ■       ■■■ SonarViewer.tsx
+■       ■       ■■■ SonarCanvas.tsx
+■       ■       ■■■ FrameNavigator.tsx
+■       ■       ■■■ DetectionOverlay.tsx
+■       ■       ■■■ SegmentationOverlay.tsx
+■       ■       ■■■ XaiOverlay.tsx
+■       ■       ■■■ PhysicsEvidencePanel.tsx
+■       ■       ■■■ SonarMetadataPanel.tsx
+■       ■■■ pages/
+■       ■   ■■■ public/
+■       ■   ■■■ auth/
+■       ■   ■■■ dashboard/
+■       ■   ■■■ surveys/
+■       ■   ■■■ review/
+■       ■   ■■■ targets/
+■       ■   ■■■ map/
+■       ■   ■■■ missions/
+■       ■   ■■■ analytics/
+■       ■   ■■■ reports/
+■       ■   ■■■ admin/
+■       ■   ■■■ shared/
+■       ■■■ hooks/
+
+
+=== PAGE 3 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 3
+■       ■■■ store/
+■       ■■■ api/
+■       ■   ■■■ authApi.ts
+■       ■   ■■■ surveyApi.ts
+■       ■   ■■■ detectionApi.ts
+■       ■   ■■■ targetApi.ts
+■       ■   ■■■ missionApi.ts
+■       ■   ■■■ index.ts
+■       ■■■ types/
+■       ■■■ utils/
+■       ■■■ assets/
+■
+■■■ backend-auth/
+■   ■■■ pom.xml
+■   ■■■ src/main/java/com/tarang/auth/
+■       ■■■ AuthApplication.java
+■       ■■■ config/
+■       ■■■ controller/
+■       ■■■ service/
+■       ■■■ repository/
+■       ■■■ model/
+■       ■■■ dto/
+■       ■■■ security/
+■       ■■■ exception/
+■
+■■■ backend-app/
+■   ■■■ requirements.txt
+■   ■■■ alembic.ini
+■   ■■■ alembic/
+■   ■   ■■■ versions/
+■   ■   ■■■ env.py
+■   ■■■ app/
+■       ■■■ main.py
+■       ■■■ api/
+■       ■■■ core/
+■       ■■■ db/
+■       ■■■ models/
+■       ■■■ schemas/
+■       ■■■ services/
+■       ■■■ pipeline/
+■       ■■■ ai/
+■       ■■■ storage/
+■       ■■■ tasks/
+■
+■■■ storage/
+■   ■■■ surveys/{survey_id}/
+■       ■■■ raw/
+■       ■■■ extracted/
+■       ■■■ processed/{processing_job_id}/
+■
+■■■ nginx/
+■   ■■■ nginx.conf
+■
+■■■ docker/
+    ■■■ frontend/
+    ■■■ backend-auth/
+    ■■■ backend-app/
+    ■■■ postgres/
+    ■■■ redis/
+3. What Each Major Code Area Does
+ Area
+Responsibility
+Do not put here
+frontend/src/config
+API base config, route constants, shared frontend constants.
+Business API calls scattered across components.
+frontend/src/features
+Feature-specific UI logic and feature composition.
+Global backend logic.
+frontend/src/components/sonar
+Central sonar visualization: frames, boxes, masks, XAI, physics evidence, metadata.
+Model training.
+frontend/src/api
+RTK Query server-state APIs; auth API calls Spring Boot, application APIs call FastAPI.
+Duplicate Axios service layer.
+backend-auth
+Login, registration, refresh, users, roles, organizations, JWT issuance and identity security.
+SSS processing or AI inference.
+backend-app/api
+FastAPI HTTP endpoints.
+Long-running image/model processing directly inside request handlers.
+backend-app/services
+Business logic and orchestration between repositories/storage/pipeline.
+React-specific logic.
+backend-app/pipeline
+Normalized SSS contracts, ingestion, preprocessing, physics, geotagging, deduplication and pipeline orchestration.
+Duplicate model implementation.
+backend-app/ai
+YOLO/U-Net inference, model loading, postprocessing, XAI and training utilities.
+HTTP route definitions.
+backend-app/tasks
+Celery/background execution for heavy jobs.
+Interactive request/response UI logic.
+storage
+Large sonar files and generated artifacts.
+Credentials or database records.
+4. Critical Request-to-Code Connections
+
+
+=== PAGE 4 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 4
+Use case
+Connection
+Login
+React Login.tsx → authApi.ts → Nginx /api/auth/login → Spring AuthController → AuthService → UserRepository → PostgreSQL → JWT response.
+Survey upload
+UploadSurvey.tsx → surveyApi.ts → FastAPI survey route → survey service → repository + storage service → processing_jobs → Celery task → pipeline orchestration.
+Preprocessing
+Celery task → orchestration.py → ingestion → adapter → nadir mask → slant-range → calibrated/controlled TVG → destriping → denoise/enhancement → quality → artifacts + frame status.
+AI analysis
+Detection workspace → detectionApi.ts → detection service → AI inference → YOLO boxes/classes → U-Net refinement masks → evidence fusion → detections table.
+Physics/XAI
+Detection result → physics validation + XAI → physics_validation/xai_evidence → frontend evidence panels and overlays.
+Geotagging
+Detection + source frame/navigation metadata → geotagging service → authoritative geotag → PostGIS point + uncertainty.
+Target fusion
+Multiple detections → deduplication/association → detection_target_mapping → targets + target_history.
+Review
+Review queue → assignment → expert review → corrected class/bbox/mask → dataset_samples → dataset version for future training.
+Reports
+Report request → FastAPI → background task → generated artifact → storage_artifacts → authorized download endpoint.
+
+
+=== PAGE 5 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 5
+5. SSS Processing Pipeline
+ Raw SSS file / live stream
+        |
+        v
+Device Adapter Layer
+  XTF / JSF / HSX / SDF / PNG
+        |
+        v
+Normalized SonarFrame + NavigationSample
+        |
+        v
+Nadir-Zone Mask
+  (do not crop/stitch; preserve nadir)
+        |
+        v
+Slant-Range / Geometry Correction
+        |
+        v
+Sonar-Specific TVG / Calibration
+        |
+        v
+Destriping
+        |
+        v
+Speckle / Noise Suppression
+        |
+        v
+Controlled Dynamic-Range Enhancement
+        |
+        v
+Dropout + Motion / Quality Handling
+        |
+        v
+Image Quality Assessment
+        |
+        +----> Enhanced frame
+        +----> Shadow map
+        +----> Dropout flags
+        +----> Quality score
+        +----> Processing parameters
+        |
+        v
+Tiling / Inference preparation
+        |
+        v
+YOLO detector
+        |
+        +----> bounding boxes + class + confidence
+        |
+        v
+U-Net / U-Net++ refinement (when useful)
+        |
+        +----> segmentation mask
+        |
+        v
+Confidence / evidence fusion
+        |
+        +----> physics validation
+        +----> unknown anomaly / OOD
+        +----> XAI
+        +----> geotagging
+        |
+        v
+Deduplication / Target fusion
+        |
+        v
+Review + GIS + Mission / Reporting
+Implementation note: TVG is not a generic image multiplication step. Use the sonar/device calibration profile and correct
+units. A dB loss term must not be blindly multiplied into intensity as though it were a linear gain.
+Missing IMU metadata should trigger a graceful fallback. The pipeline can retain the frame, record the missing-data quality
+flag, and skip or downgrade motion-dependent corrections rather than failing the entire survey.
+6. AI Training vs Inference
+ TRAINING
+Labeled SSS images
+   |
+   +--> bounding-box annotations --> YOLO training --> YOLO weights
+   |
+   +--> pixel masks -------------> U-Net/U-Net++ training --> segmentation weights
+   |
+   +--> validation/test sets --> metrics + model evaluation
+                                  |
+                                  v
+                              ai_models
+
+
+=== PAGE 6 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 6
+INFERENCE
+New SSS frame
+   |
+   v
+Preprocessing
+   |
+   v
+Trained YOLO weights
+   |
+   +--> predicted box [x1,y1,x2,y2], class, confidence
+   |
+   v
+U-Net/U-Net++ (optional refinement)
+   |
+   +--> segmentation mask
+   |
+   v
+Physics + quality + geospatial evidence
+   |
+   v
+Final confidence
+   |
+   v
+detections
+YOLO and U-Net are themselves neural-network architectures/models. The trained weights are the resulting models. A
+second ML model is not required merely to feed a model into YOLO or U-Net.
+The frontend receives the stored bounding_box JSON and renders it in DetectionOverlay.tsx. Pixel coordinates/masks can
+drive SegmentationOverlay.tsx.
+
+
+=== PAGE 7 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 7
+7. v6.2 Database Schema — Complete Table Inventory
+ #
+Table
+Purpose
+Key relationships
+1
+organizations
+Organizations and ownership context.
+users, surveys
+2
+roles
+RBAC role definitions and permissions.
+user_roles
+3
+users
+Identity profile linked to organization.
+organizations, user_roles, refresh_tokens, audit_logs
+4
+user_roles
+Many-to-many user/role mapping.
+users, roles
+5
+refresh_tokens
+Hashed refresh-token lifecycle.
+users
+6
+sonar_devices
+Device profiles, formats, telemetry and calibration configuration.
+preprocessing_runs
+7
+target_classes
+Detection ontology and class hierarchy.
+detections, targets, reviews, dataset_samples
+8
+storage_artifacts
+Generic artifact metadata registry.
+Application-level artifact references
+9
+surveys
+Top-level survey/job domain object.
+users, organizations, sss_files, frames, jobs, detections
+10
+sss_files
+Uploaded SSS files belonging to surveys.
+surveys
+11
+survey_frames
+Frame metadata, navigation, quality and preprocessing state.
+surveys, detections, geotags
+12
+processing_jobs
+Survey-level pipeline execution.
+surveys, processing_stages
+13
+processing_stages
+Per-stage progress and retry state.
+processing_jobs, detections
+14
+preprocessing_runs
+Preprocessing configuration and quality result.
+surveys, frames, sonar_devices
+15
+dataset_versions
+Immutable training/evaluation dataset version identifiers.
+ai_models, evaluations, samples
+16
+ai_models
+Model registry and deployment state.
+dataset_versions, detections
+17
+model_evaluations
+Model metrics on dataset versions.
+ai_models, dataset_versions
+18
+detections
+Raw AI detection result and evidence scores.
+survey/frame/stage/model/class
+19
+xai_evidence
+One-to-one explainability evidence.
+detections
+20
+physics_validation
+One-to-one physics validation evidence.
+detections
+21
+geotags
+Detection geospatial outputs; one authoritative tag per detection.
+detections, survey_frames
+22
+targets
+Fused/registered real-world target.
+classes, best frame
+23
+target_history
+Audit/history of target changes.
+targets, users
+24
+detection_target_mapping
+Many-to-many detection-to-target association.
+detections, targets
+25
+review_assignments
+Review queue/claim lifecycle.
+detections, users
+26
+reviews
+Expert decisions and corrections.
+detections, targets, users, classes
+27
+dataset_samples
+Curated training/evaluation samples.
+dataset_versions, detections, frames, classes
+28
+notifications
+User-facing asynchronous notifications.
+users
+29
+audit_logs
+Security and action audit trail.
+users
+8. Important Schema Constraints and Indexes
+ Area
+Final v6.2 behavior
+Identity
+users.email UNIQUE; roles.name UNIQUE; refresh_tokens.token_hash UNIQUE.
+Frame uniqueness
+UNIQUE(survey_id, frame_number).
+Progress
+Job/stage progress constrained to 0–100; attempt/retry counters constrained to valid non-negative ranges.
+Quality
+Frame, preprocessing and dataset-sample quality scores are NULL-safe and constrained to 0–100.
+AI metrics
+Detection/model evaluation evidence and metrics are constrained to 0–1 where applicable.
+XAI / physics
+One xai_evidence and one physics_validation record per detection via UNIQUE detection_id.
+Authoritative geotag
+Partial unique index allows at most one authoritative geotag per detection.
+Review claiming
+Partial unique index allows at most one claimed assignment per detection.
+PostGIS
+GIST indexes on frame, geotag and target location columns.
+Materialized view
+mv_survey_stats has a unique operator_id index, allowing CONCURRENT refresh.
+
+
+=== PAGE 8 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 8
+9. Schema-to-Code Rules
+ Alembic is the only migration mechanism in backend-app. Do not create a second migrations directory.
+ SQLAlchemy models mirror the database, while Pydantic schemas define API contracts. Do not confuse the two.
+ Keep large sonar binaries outside PostgreSQL; database columns store metadata, checksums and artifact/storage URIs.
+ When latitude/longitude are authoritative, service code must construct and maintain the corresponding PostGIS location
+point.
+ Validate cross-table consistency in service logic: detection.survey_id must match frame.survey_id; similar checks apply
+to preprocessing_runs and dataset_samples.
+ Use repository classes for persistence and services for business rules. Routers/controllers should stay thin.
+ Use background workers for heavy SSS processing, inference, XAI and report generation.
+
+
+=== PAGE 9 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 9
+10. Final Technology Stack
+ Layer
+Technology
+Purpose
+Frontend
+React + TypeScript + Vite
+Web application and dashboards.
+UI
+Tailwind CSS
+Responsive application styling.
+Client state
+Redux Toolkit
+UI/global state.
+Server state
+RTK Query
+Caching, API calls and invalidation.
+Maps
+Leaflet + GeoJSON
+Survey/target/GIS visualization.
+Auth backend
+Spring Boot + Spring Security
+Identity, JWT, roles, refresh-token lifecycle.
+Application backend
+FastAPI + Python
+TARANG API, orchestration and scientific processing.
+Database
+PostgreSQL + PostGIS
+Relational data and geospatial queries.
+ORM
+SQLAlchemy
+Python database access.
+Migration
+Alembic
+Versioned database migrations.
+Queue/cache
+Redis
+Celery broker, short-lived cache, rate limiting/live events where appropriate.
+Workers
+Celery
+Long-running processing and asynchronous jobs.
+Computer vision
+OpenCV + NumPy
+SSS preprocessing and image operations.
+AI
+PyTorch + YOLO + U-Net/U-Net++
+Detection and segmentation.
+Inference
+ONNX Runtime where useful
+Optimized deployment of exported models.
+XAI
+Grad-CAM/Score-CAM-style evidence
+Visual explanation for model predictions.
+Gateway
+Nginx
+Routing, TLS termination and security headers.
+Containers
+Docker + Docker Compose
+Reproducible local/development deployment.
+11. Required Development Environment
+ Git + GitHub/GitLab repository.
+ Node.js + npm for frontend development.
+ JDK 17+ and Maven for Spring Boot.
+ Python 3.11+ (or the version fixed by requirements.txt) for FastAPI/Celery.
+ Docker Desktop or Docker Engine + Compose.
+ PostgreSQL 14+ with PostGIS 3.2+ (Docker is preferred for consistent development).
+ Redis.
+ GPU is useful for AI training/inference but is not required for the basic web platform. CPU fallback can support
+development and demo-scale processing.
+12. Security Architecture
+ Spring Boot issues asymmetric JWTs; FastAPI verifies the public key. Use key IDs (kid) to support rotation.
+ Refresh tokens are stored hashed, never as plaintext.
+ Restrict CORS and preferably expose the application through the Nginx same-origin gateway.
+ Rate-limit login, registration, password reset and large upload endpoints.
+ Validate upload extension, MIME/content signature, size and expected structure before processing.
+ Never expose raw filesystem/storage paths through public APIs; use authorized download endpoints or signed URLs.
+ Protect sensitive marine coordinates through role/organization authorization; public map views must use a deliberately
+safe representation.
+ Use correlation IDs and audit_logs for security-sensitive actions.
+
+
+=== PAGE 10 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 10
+ Do not commit production credentials or a known development password as a real deployment secret. The supplied
+admin seed must be treated as development/bootstrap-only.
+13. Testing Strategy
+ Level
+What to test
+Frontend
+Component tests, feature behavior, route guards and end-to-end flows.
+Spring Boot
+Auth, password hashing, JWT, refresh tokens, RBAC, organization/user operations.
+FastAPI
+API contracts, authorization, validation, repositories and services.
+Pipeline
+Each preprocessing stage independently plus complete pipeline integration.
+Image regression
+Golden SSS frames: ensure preprocessing changes do not unexpectedly destroy shadows/targets.
+Physics
+Synthetic known-geometry tests for slant range, shadow consistency and coordinate calculations.
+AI
+Precision/recall/mAP/IoU/F1; evaluate by device, environment and survey rather than only a single aggregate score.
+Data leakage
+Split by survey/source where appropriate so nearly identical frames do not leak across train/test.
+Integration
+React ↔ Nginx ↔ Spring/FastAPI ↔ PostgreSQL/Redis ↔ worker flows.
+14. Recommended Implementation Order
+1. Docker Compose: PostgreSQL/PostGIS + Redis + Nginx + backend/frontend shells.
+2. Alembic initial migration implementing the supplied v6.2 schema.
+3. SQLAlchemy models + DB session + repositories.
+4. Spring Boot authentication/identity and JWT key handling.
+5. FastAPI core security, JWT verification and authorization dependencies.
+6. Survey/file upload APIs and storage service.
+7. Pipeline contracts and ingestion adapters.
+8. SSS preprocessing stages + quality outputs.
+9. Celery job orchestration and processing-stage progress.
+10. AI model registry + YOLO inference + U-Net/U-Net++ refinement.
+11. Physics validation, XAI, geotagging and deduplication.
+12. Review workflow and dataset-sample creation.
+13. React RTK Query integration and role-aware pages.
+14. Sonar Viewer with detection/segmentation/XAI/physics overlays.
+15. Targets, GIS map, missions and reports.
+16. Security hardening, test suite, performance profiling and SIH demo mode.
+
+
+=== PAGE 11 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 11
+15. README.md — What It Should Contain
+ # TARANG Platform
+## 1. Overview
+What TARANG solves and who uses it.
+## 2. Architecture
+React -> Nginx -> Spring Boot / FastAPI
+Database, Redis, Celery and storage.
+## 3. Repository Structure
+Explain frontend, backend-auth, backend-app, storage, nginx and docker.
+## 4. Technology Stack
+List the final technologies and why each is used.
+## 5. Prerequisites
+Node, JDK/Maven, Python, Docker, PostgreSQL/PostGIS, Redis.
+## 6. Environment Setup
+Copy .env.example, configure local variables, start Docker Compose.
+## 7. Database
+Alembic migration commands and PostgreSQL/PostGIS requirements.
+## 8. Running the Services
+Frontend, Spring Boot, FastAPI and workers.
+## 9. Authentication
+JWT flow, roles, refresh tokens and service boundaries.
+## 10. Survey Processing
+Upload -> ingestion -> preprocessing -> AI -> evidence -> geotag -> target.
+## 11. AI
+Training datasets, model versions, evaluation and inference.
+## 12. Storage
+Raw/extracted/processed artifact layout.
+## 13. API
+Endpoint groups and example request/response contracts.
+## 14. Testing
+Unit, integration, pipeline, AI and end-to-end commands.
+## 15. Security
+Secrets, credentials, coordinate access, uploads and audit logging.
+## 16. Development Rules
+Where new code belongs and which layers must not be duplicated.
+## 17. Deployment
+Production architecture, environment variables, database backup and model artifacts.
+## 18. SIH Demo
+Demo dataset, processing workflow, expected output and 3-5 minute presentation path.
+## 19. License / Team
+Project ownership and team information.
+16. Final Implementation Checklist
+■ Repository matches the approved structure; no duplicate service/migration layers.
+■ Spring Boot remains the single authentication/identity owner.
+■ FastAPI owns TARANG application APIs and pipeline execution.
+■ Nginx is the public gateway.
+■ Alembic implements the supplied v6.2 schema.
+■ PostGIS location columns are synchronized with authoritative coordinates.
+■ Large SSS files and generated artifacts remain outside PostgreSQL.
+■ SSS preprocessing preserves acoustic shadows and does not depend on cropping the nadir.
+■ TVG/calibration uses device-aware units and calibration rather than a blind dB multiplication.
+■ YOLO produces detection boxes/classes/confidence; U-Net/U-Net++ refines segmentation where useful.
+■ Physics, quality and geospatial evidence contribute to final confidence.
+
+
+=== PAGE 12 ===
+TARANG Platform — Final Implementation Guide v6.2
+Page 12
+■ Unknown anomalies are represented without forcing every target into a known class.
+■ Duplicate detections are fused into targets.
+■ Expert reviews can produce curated dataset samples.
+■ Sensitive coordinates and artifacts are protected by authorization.
+■ The supplied admin seed is development-only and never becomes a production credential.
+■ Testing covers frontend, backend, pipeline, physics, AI and integration.
+■ README explains setup, architecture, database, AI, security, testing and demo execution.
+Final baseline: Use this architecture and v6.2 schema as the implementation baseline. Avoid adding speculative tables or
+extra architectural layers until a real requirement appears during development.
+
+

@@ -1,0 +1,5 @@
+# Placeholder for raw, extracted, and processed survey artifacts.
+# Structure:
+# storage/surveys/{survey_id}/raw/
+# storage/surveys/{survey_id}/extracted/
+# storage/surveys/{survey_id}/processed/{processing_job_id}/

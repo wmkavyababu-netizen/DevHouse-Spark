@@ -1,0 +1,149 @@
+services:
+  # ============================================================================
+  # 1. PostgreSQL with PostGIS 3.2+ Extension
+  # ============================================================================
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: tarang-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tarang_db}
+      POSTGRES_USER: ${POSTGRES_USER:-tarang_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tarang_insecure_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tarang_user} -d ${POSTGRES_DB:-tarang_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tarang-network
+
+  # ============================================================================
+  # 2. Redis - Celery Broker, Result Backend & Cache
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: tarang-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tarang-network
+
+  # ============================================================================
+  # 3. Spring Boot - Authentication & Identity Owner
+  # ============================================================================
+  backend-auth:
+    build:
+      context: .
+      dockerfile: docker/backend-auth/Dockerfile
+    container_name: tarang-backend-auth
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-tarang_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-tarang_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-tarang_insecure_dev_password}
+      SERVER_PORT: ${AUTH_SERVICE_PORT:-8080}
+      JWT_KEY_ID: ${JWT_KEY_ID:-tarang-dev-key-v1}
+      JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-60}
+      REFRESH_TOKEN_EXPIRATION_DAYS: ${REFRESH_TOKEN_EXPIRATION_DAYS:-30}
+    ports:
+      - "${AUTH_SERVICE_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tarang-network
+
+  # ============================================================================
+  # 4. FastAPI - Application, SSS Pipeline & AI Processing Engine
+  # ============================================================================
+  backend-app:
+    build:
+      context: .
+      dockerfile: docker/backend-app/Dockerfile
+    container_name: tarang-backend-app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-tarang_user}:${POSTGRES_PASSWORD:-tarang_insecure_dev_password}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-tarang_db}
+      DATABASE_SYNC_URL: postgresql://${POSTGRES_USER:-tarang_user}:${POSTGRES_PASSWORD:-tarang_insecure_dev_password}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-tarang_db}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/1}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/2}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL:-http://backend-auth:8080}
+      STORAGE_ROOT: ${STORAGE_ROOT:-/app/storage}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost,http://localhost:3000,http://localhost:80}
+    ports:
+      - "${APP_SERVICE_PORT:-8000}:8000"
+    volumes:
+      - ./storage:/app/storage
+      - ./backend-app/app:/app/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend-auth:
+        condition: service_started
+    networks:
+      - tarang-network
+
+  # ============================================================================
+  # 5. Frontend - React + TypeScript + Vite Dev Server
+  # ============================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: tarang-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    networks:
+      - tarang-network
+
+  # ============================================================================
+  # 6. Nginx - Reverse Proxy Gateway & Rate Limiting
+  # ============================================================================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: tarang-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend-auth
+      - backend-app
+    networks:
+      - tarang-network
+
+networks:
+  tarang-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
