@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/seabedscene.tsx","./src/data/physics.test.ts","./src/data/physics.ts","./src/data/synthetic.ts","./src/data/types.ts","./src/data/validate.ts","./vite.config.ts"],"version":"5.8.3"}

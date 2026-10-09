@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>TARANG — Admin Portal</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        seafoam: '#14B8A6',
+                        'ocean-navy': '#031326',
+                        'tactical-border': 'rgba(20, 184, 166, 0.25)'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        headline: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+         :root {
+            --navy: #031326;
+            --navy-2: #0a2540;
+            --teal: #0d9488;
+            --teal-soft: #ccfbf1;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --bg: #f1f6f9;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .main-bg {
+            background: radial-gradient(900px 380px at 85% -80px, rgba(20, 184, 166, .13), transparent 70%), radial-gradient(700px 300px at -5% 0, rgba(3, 105, 161, .08), transparent 70%), var(--bg);
+        }
+        /* Header */
+        
+        .app-header {
+            background: linear-gradient(100deg, var(--navy) 0%, var(--navy-2) 100%);
+            border-bottom: 1px solid rgba(20, 184, 166, .35);
+            box-shadow: 0 8px 24px -12px rgba(3, 19, 38, .6);
+        }
+        
+        .logo-ring {
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, .45), 0 0 18px rgba(20, 184, 166, .35);
+        }
+        
+        .header-chip {
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid rgba(255, 255, 255, .14);
+            color: #e2e8f0;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid rgba(255, 255, 255, .16);
+            color: #e2e8f0;
+            transition: all .2s;
+        }
+        
+        .logout-btn:hover {
+            background: #e11d48;
+            border-color: #e11d48;
+            color: #fff;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, .08);
+            border: 1px solid rgba(255, 255, 255, .16);
+            color: #e2e8f0;
+            transition: all .2s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(20, 184, 166, .25);
+        }
+        /* Cards */
+        
+        .marine-card,
+        .marine-card-no-hover {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px -16px rgba(15, 23, 42, .18);
+        }
+        
+        .marine-card {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            cursor: pointer;
+        }
+        
+        .marine-card:hover {
+            transform: translateY(-3px);
+            border-color: #5eead4;
+            box-shadow: 0 14px 30px -14px rgba(13, 148, 136, .45);
+        }
+        
+        .marine-card:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
+        }
+        /* Hero */
+        
+        .hero {
+            background: linear-gradient(120deg, var(--navy) 0%, #0b3a5b 60%, #0f766e 120%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .5;
+            pointer-events: none;
+            background: radial-gradient(circle at 92% 20%, rgba(94, 234, 212, .35), transparent 40%), repeating-radial-gradient(circle at 100% 100%, transparent 0 26px, rgba(255, 255, 255, .05) 26px 27px);
+        }
+        /* Section headings */
+        
+        .sec-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+        
+        .sec-title::before {
+            content: "";
+            width: 4px;
+            height: 18px;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #14b8a6, #0369a1);
+        }
+        /* Stat tiles */
+        
+        .stat-tile {
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+        
+        .tone-slate {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        .tone-teal {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+        
+        .tone-emerald {
+            background: #d1fae5;
+            color: #047857;
+        }
+        
+        .tone-amber {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        
+        .tone-sky {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .tone-rose {
+            background: #ffe4e6;
+            color: #be123c;
+        }
+        /* Tables */
+        
+        .data-table {
+            width: 100%;
+            font-size: .78rem;
+        }
+        
+        .data-table thead th {
+            background: #f8fafc;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: .68rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: .9rem 1rem;
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table tbody td {
+            padding: .85rem 1rem;
+            color: #475569;
+        }
+        
+        .data-table tbody tr {
+            transition: background .15s;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f0fdfa;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: inline-grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: .72rem;
+            color: #0f766e;
+            background: linear-gradient(135deg, #ccfbf1, #bae6fd);
+            margin-right: .65rem;
+            vertical-align: middle;
+        }
+        
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .2rem .6rem;
+            border-radius: 999px;
+            font-size: .65rem;
+            font-weight: 700;
+            border: 1px solid;
+        }
+        
+        .pill::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .pill-on {
+            background: #f0fdfa;
+            color: #0f766e;
+            border-color: #99f6e4;
+        }
+        
+        .pill-off {
+            background: #f1f5f9;
+            color: #64748b;
+            border-color: #e2e8f0;
+        }
+        /* Buttons & inputs */
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            color: #fff;
+            border-radius: 12px;
+            padding: .55rem 1rem;
+            font-size: .75rem;
+            font-weight: 700;
+            box-shadow: 0 8px 18px -8px rgba(13, 148, 136, .7);
+            transition: transform .15s, box-shadow .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px -8px rgba(13, 148, 136, .8);
+        }
+        
+        .btn-ghost {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: .4rem .75rem;
+            font-size: .72rem;
+            font-weight: 700;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            transition: background .15s;
+        }
+        
+        .btn-ghost:hover {
+            background: #f8fafc;
+        }
+        
+        select {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: .35rem .6rem;
+            background: #fff;
+            font-size: .72rem;
+            color: #334155;
+        }
+        
+        select:focus,
+        .btn-ghost:focus-visible,
+        .btn-primary:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 1px;
+        }
+        
+        .view-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .status-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .75rem;
+            padding: .75rem .9rem;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #b6c4d2;
+            border-radius: 8px;
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+    </style>
+
+    <script src="js/auth.js" defer></script>
+    <script>
+        protectRoute();
+    </script>
+</head>
+
+<body class="h-full flex flex-col antialiased font-sans overflow-hidden">
+
+    <!-- TOP NAVBAR -->
+    <header class="app-header h-20 w-full z-40 flex items-center justify-between px-5 sm:px-8 shrink-0">
+        <div class="flex items-center gap-4">
+            <div id="back-btn-container" class="hidden">
+                <button onclick="switchView('dashboard')" class="back-btn flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-bold">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span> Back
+        </button>
+            </div>
+            <div class="logo-ring w-12 h-12 rounded-full overflow-hidden p-1 flex items-center justify-center shrink-0">
+                <img src="/assets/logoimage.jpg" class="w-full h-full object-contain rounded-full" alt="TARANG" loading="lazy">
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-headline font-extrabold text-xl text-white tracking-[.18em] leading-none">TARANG</span>
+                <span id="header-page-title" class="hidden sm:inline text-xs font-mono font-semibold text-teal-300 border-l border-white/20 pl-3">Admin Dashboard</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="header-chip flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-white font-bold" id="admin-user-name">Admin Control</span>
+                <span class="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] bg-teal-400/20 text-teal-200 font-bold border border-teal-300/30">SYSTEM ADMIN</span>
+            </div>
+            <a href="login.html" onclick="sessionStorage.clear(); localStorage.clear();" class="logout-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-mono text-xs font-bold">
+                <span class="material-symbols-outlined text-[16px]">logout</span>
+                <span class="hidden sm:inline">LOGOUT</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="main-bg flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-8" id="main-content">
+
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="admin-view max-w-7xl mx-auto space-y-8">
+
+            <!-- Hero -->
+            <div class="hero p-6 sm:p-8 text-white">
+                <div class="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <div>
+                        <p class="text-teal-200 text-xs font-mono mb-1" id="hero-date"></p>
+                        <h1 class="font-headline font-extrabold text-2xl sm:text-3xl tracking-tight">Welcome back, <span id="hero-name">Admin</span></h1>
+                        <p class="text-slate-300 text-sm mt-1.5 max-w-xl">Track survey activity across regions and manage the people behind every survey.</p>
+                    </div>
+                    <div class="flex gap-6 text-right">
+                        <div>
+                            <div class="text-3xl font-mono font-bold" id="hero-total">–</div>
+                            <div class="text-[11px] text-slate-300">surveys on record</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Survey Summary -->
+            <section>
+                <h2 class="sec-title mb-4">Survey Summary</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" id="survey-summary-cards">
+                    <div class="col-span-full p-6 text-center text-slate-500 text-sm font-mono marine-card-no-hover">Loading survey data...</div>
+                </div>
+            </section>
+
+            <!-- Survey Trend -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="sec-title">Survey Trend</h2>
+                    <select id="trend-period-select" onchange="loadSurveyTrend()" class="font-mono">
+            <option value="week">Last Week</option>
+            <option value="month">Last Month</option>
+            <option value="year">Last Year</option>
+          </select>
+                </div>
+                <div class="marine-card-no-hover p-5 h-80 flex items-center justify-center relative">
+                    <canvas id="trendChart"></canvas>
+                    <div id="trend-empty-state" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm font-mono hidden">No survey history available for this period.</div>
+                </div>
+            </section>
+
+            <!-- Survey Breakdown -->
+            <section>
+                <h2 class="sec-title mb-4">Survey Breakdown</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="marine-card-no-hover p-5 flex flex-col h-80">
+                        <h3 class="text-sm font-headline font-bold text-slate-700 mb-2">By purpose</h3>
+                        <div class="flex-1 relative flex items-center justify-center">
+                            <canvas id="breakdownPurposeChart"></canvas>
+                            <div id="purpose-empty-state" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm font-mono hidden">No survey purpose data available.</div>
+                        </div>
+                    </div>
+                    <div class="marine-card-no-hover p-5 flex flex-col h-80">
+                        <h3 class="text-sm font-headline font-bold text-slate-700 mb-2">By region</h3>
+                        <div class="flex-1 relative flex items-center justify-center">
+                            <canvas id="breakdownRegionChart"></canvas>
+                            <div id="region-empty-state" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm font-mono hidden">No regional survey data available.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Management -->
+            <section>
+                <h2 class="sec-title mb-4">Management</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div onclick="switchView('manage-operators')" tabindex="0" role="button" class="marine-card p-5 flex items-center gap-4">
+                        <div class="stat-icon tone-teal"><span class="material-symbols-outlined">support_agent</span></div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-800">Operators</div>
+                            <div class="text-xs text-slate-500 font-mono" id="count-operators">Manage</div>
+                        </div>
+                    </div>
+                    <div onclick="switchView('manage-analysts')" tabindex="0" role="button" class="marine-card p-5 flex items-center gap-4">
+                        <div class="stat-icon tone-sky"><span class="material-symbols-outlined">troubleshoot</span></div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-800">Expert Analysts</div>
+                            <div class="text-xs text-slate-500 font-mono" id="count-analysts">Manage</div>
+                        </div>
+                    </div>
+                    <div onclick="switchView('manage-cleanup')" tabindex="0" role="button" class="marine-card p-5 flex items-center gap-4">
+                        <div class="stat-icon tone-emerald"><span class="material-symbols-outlined">cleaning_services</span></div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-800">Cleanup Teams</div>
+                            <div class="text-xs text-slate-500 font-mono" id="count-cleanup">Manage</div>
+                        </div>
+                    </div>
+                    <div onclick="switchView('manage-gov')" tabindex="0" role="button" class="marine-card p-5 flex items-center gap-4">
+                        <div class="stat-icon tone-amber"><span class="material-symbols-outlined">account_balance</span></div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-800">Government Users</div>
+                            <div class="text-xs text-slate-500 font-mono" id="count-gov">Manage</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System / Database Status (live diagnostics from GET /api/v1/system/status) -->
+            <section class="pb-6">
+                <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                    <div>
+                        <h2 class="sec-title">System / Database Status</h2>
+                        <p class="text-xs text-slate-500 mt-1 ml-4">Live probe results — statuses, details and latencies are reported by the backend, never assumed.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="admin-system-overall" class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-100 text-slate-500 border border-slate-200">CHECKING…</span>
+                        <button onclick="loadAdminSystemStatus()" class="btn-ghost font-mono">
+              <span class="material-symbols-outlined text-[15px]">refresh</span> Refresh
+            </button>
+                    </div>
+                </div>
+                <div class="marine-card-no-hover p-5">
+                    <div id="admin-system-rows" class="flex flex-col gap-2 text-xs font-mono">
+                        <div class="text-slate-500">Probing live system status…</div>
+                    </div>
+                    <div id="admin-system-config" class="mt-4 pt-4 border-t border-slate-100 text-xs font-mono text-slate-600"></div>
+                    <div id="admin-system-meta" class="mt-2 text-[10px] font-mono text-slate-400"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- MANAGE OPERATORS VIEW -->
+        <div id="view-manage-operators" class="admin-view hidden max-w-7xl mx-auto space-y-6">
+            <div class="view-head pb-2">
+                <h2 class="font-headline font-extrabold text-[24px] sm:text-[28px] text-slate-900 tracking-tight">Manage Operators</h2>
+                <button class="btn-primary font-mono"><span class="material-symbols-outlined text-[16px]">add</span> Add Operator</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="operators-stats"></div>
+            <div class="flex items-center flex-wrap gap-3 text-xs font-mono" id="operators-filters"></div>
+            <div class="marine-card-no-hover overflow-x-auto custom-scrollbar">
+                <table class="data-table text-left whitespace-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Base</th>
+                            <th>Vessel</th>
+                            <th>Surveys</th>
+                            <th>Images</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="operators-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="p-6 text-center text-slate-500">Loading operators...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MANAGE EXPERT ANALYSTS VIEW -->
+        <div id="view-manage-analysts" class="admin-view hidden max-w-7xl mx-auto space-y-6">
+            <div class="view-head pb-2">
+                <h2 class="font-headline font-extrabold text-[24px] sm:text-[28px] text-slate-900 tracking-tight">Manage Expert Analysts</h2>
+                <button class="btn-primary font-mono"><span class="material-symbols-outlined text-[16px]">add</span> Add Expert Analyst</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="analysts-stats"></div>
+            <div class="flex items-center flex-wrap gap-3 text-xs font-mono" id="analysts-filters"></div>
+            <div class="marine-card-no-hover overflow-x-auto custom-scrollbar">
+                <table class="data-table text-left whitespace-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Base</th>
+                            <th>Vessel</th>
+                            <th>Surveys</th>
+                            <th>Images</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analysts-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="p-6 text-center text-slate-500">Loading analysts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MANAGE CLEANUP TEAMS VIEW -->
+        <div id="view-manage-cleanup" class="admin-view hidden max-w-7xl mx-auto space-y-6">
+            <div class="view-head pb-2">
+                <h2 class="font-headline font-extrabold text-[24px] sm:text-[28px] text-slate-900 tracking-tight">Manage Cleanup Teams</h2>
+                <button class="btn-primary font-mono"><span class="material-symbols-outlined text-[16px]">add</span> Add Team</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="cleanup-stats"></div>
+            <div class="flex items-center flex-wrap gap-3 text-xs font-mono" id="cleanup-filters"></div>
+            <div class="marine-card-no-hover overflow-x-auto custom-scrollbar">
+                <table class="data-table text-left whitespace-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th>Region</th>
+                            <th>Members</th>
+                            <th>Surveys/Targets</th>
+                            <th>Completed</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cleanup-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="p-6 text-center text-slate-500">Loading cleanup teams...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MANAGE GOVERNMENT USERS VIEW -->
+        <div id="view-manage-gov" class="admin-view hidden max-w-7xl mx-auto space-y-6">
+            <div class="view-head pb-2">
+                <h2 class="font-headline font-extrabold text-[24px] sm:text-[28px] text-slate-900 tracking-tight">Manage Government Users</h2>
+                <button class="btn-primary font-mono"><span class="material-symbols-outlined text-[16px]">add</span> Add Government User</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="gov-stats"></div>
+            <div class="flex items-center flex-wrap gap-3 text-xs font-mono" id="gov-filters"></div>
+            <div class="marine-card-no-hover overflow-x-auto custom-scrollbar">
+                <table class="data-table text-left whitespace-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Region/Jurisdiction</th>
+                            <th>Access</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gov-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="5" class="p-6 text-center text-slate-500">Loading government users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Data Store ---
+        let globalSurveys = null;
+        let globalUsers = null;
+
+        // --- Chart Instances ---
+        let trendChartInst = null;
+        let breakdownPurposeChartInst = null;
+        let breakdownRegionChartInst = null;
+
+        // --- Endpoints (unchanged) ---
+        const API = {
+            surveys: '/api/v1/surveys',
+            users: '/api/admin/users',
+            cleanupTeams: '/api/admin/cleanup-teams',
+            governmentUsers: '/api/admin/government-users'
+        };
+
+        const PALETTE = ['#0d9488', '#0369a1', '#7c3aed', '#e11d48', '#d97706', '#475569'];
+
+        // --- Small UI helpers ---
+        function initials(name) {
+            return String(name || '?').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '?';
+        }
+
+        function nameCell(name) {
+            return `<span class="avatar">${initials(name)}</span><span class="font-bold text-slate-900">${name || '-'}</span>`;
+        }
+
+        function statusPill(status, activeValue) {
+            const on = status === (activeValue || 'active');
+            return `<span class="pill ${on ? 'pill-on' : 'pill-off'}">${(status || 'UNKNOWN').toUpperCase()}</span>`;
+        }
+
+        function setCount(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', async() => {
+            const user = getCurrentUser();
+            if (user && user.full_name) {
+                document.getElementById('admin-user-name').textContent = user.full_name;
+                document.getElementById('hero-name').textContent = user.full_name;
+            }
+            document.getElementById('hero-date').textContent =
+                new Date().toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+            if (window.Chart) {
+                Chart.defaults.font.family = 'Space Grotesk';
+                Chart.defaults.color = '#64748b';
+            }
+
+            await Promise.allSettled([
+                loadSurveyData(),
+                loadUsersData(),
+                loadCleanupTeams(),
+                loadAdminSystemStatus()
+            ]);
+        });
+
+        // --- System / Database Status (live diagnostics, never hardcoded) ---
+        function escapeAdminStatus(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[c]));
+        }
+
+        function renderAdminStatusRow(label, name, entry) {
+            const badge = entry && entry.status ? entry.status : 'NO DATA';
+            const ok = !!(entry && entry.connected);
+            const badgeClass = entry ?
+                (ok ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-rose-50 text-rose-700 border-rose-200') :
+                'bg-slate-100 text-slate-500 border-slate-200';
+            const detail = entry && entry.detail ? escapeAdminStatus(entry.detail) : 'The server did not return a detail for this check.';
+            const latency = entry && entry.latency_ms != null ? ` · ${Number(entry.latency_ms).toFixed(1)} ms` : '';
+            return `
+        <div class="status-row">
+          <div class="min-w-0">
+            <div class="font-bold text-slate-800">${escapeAdminStatus(label)} <span class="text-slate-400 font-medium">→ ${escapeAdminStatus(name)}</span></div>
+            <div class="text-[11px] text-slate-500 mt-0.5 break-words">${detail}<span class="text-slate-400">${latency}</span></div>
+          </div>
+          <span class="shrink-0 px-2.5 py-0.5 rounded-full border text-[10px] font-bold ${badgeClass}">${escapeAdminStatus(badge)}</span>
+        </div>`;
+        }
+
+        async function loadAdminSystemStatus() {
+            const rows = document.getElementById('admin-system-rows');
+            const overall = document.getElementById('admin-system-overall');
+            const config = document.getElementById('admin-system-config');
+            const meta = document.getElementById('admin-system-meta');
+            rows.innerHTML = '<div class="text-slate-500">Probing live system status…</div>';
+            config.innerHTML = '';
+            meta.innerHTML = '';
+            overall.textContent = 'CHECKING…';
+            overall.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-700 border border-amber-200';
+            try {
+                const response = await fetch('/api/v1/system/status');
+                const data = await response.json().catch(() => null);
+                if (!data || typeof data !== 'object') {
+                    throw new Error(`Status service returned an unreadable response (HTTP ${response.status}).`);
+                }
+                const isUp = data.overall === 'CONNECTED' && response.ok;
+                overall.textContent = data.overall || (response.ok ? 'UNKNOWN' : `HTTP ${response.status}`);
+                overall.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border ' +
+                    (isUp ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-rose-50 text-rose-700 border-rose-200');
+                rows.innerHTML =
+                    renderAdminStatusRow('Database', 'Supabase', data.database && data.database.supabase) +
+                    renderAdminStatusRow('Authentication', 'Supabase Auth', data.authentication && data.authentication.supabase_auth) +
+                    renderAdminStatusRow('Storage', 'Supabase Storage', data.storage && data.storage.supabase_storage) +
+                    renderAdminStatusRow('API', 'Backend API', data.api && data.api.backend_api) +
+                    (data.error ? `<div class="text-rose-600 text-[11px]">${escapeAdminStatus(data.error)}</div>` : '');
+                const cfg = data.configuration || {};
+                const yesNo = v => v ? '<span class="text-teal-700 font-bold">yes</span>' : '<span class="text-rose-600 font-bold">no</span>';
+                config.innerHTML = `
+          <div class="font-bold text-slate-700 mb-2 text-[11px]">Configuration (redacted by the backend — no key material is exposed)</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px]">
+            <div>Supabase URL configured: ${yesNo(cfg.supabase_url_configured)}</div>
+            <div>Anon key configured: ${yesNo(cfg.anon_key_configured)}</div>
+            <div>Service key configured (server-side): ${yesNo(cfg.service_key_configured)}</div>
+            <div>Service key exposed to browser: ${cfg.service_key_exposed_to_browser ? '<span class="text-rose-600 font-bold">YES — investigate</span>' : '<span class="text-teal-700 font-bold">no</span>'}</div>
+            <div>Authoritative database: <span class="font-bold">${escapeAdminStatus(data.authoritative_database || 'unknown')}</span></div>
+          </div>`;
+                meta.textContent = `Probe ${data.probe_id || 'n/a'} · generated at ${data.generated_at || 'n/a'}`;
+            } catch (error) {
+                overall.textContent = 'UNREACHABLE';
+                overall.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200';
+                rows.innerHTML = `<div class="text-rose-600 text-[11px]">System status check failed: ${escapeAdminStatus(error.message || error)}</div>`;
+            }
+        }
+
+        async function fetchData(url) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                return await res.json();
+            } catch (e) {
+                console.error('Fetch error for', url, e);
+                return null; // Signals error state
+            }
+        }
+
+        // --- View Switching ---
+        function switchView(viewId) {
+            document.querySelectorAll('.admin-view').forEach(v => v.classList.add('hidden'));
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) {
+                target.classList.remove('hidden');
+                target.style.opacity = 0;
+                setTimeout(() => {
+                    target.style.transition = 'opacity 0.3s ease';
+                    target.style.opacity = 1;
+                }, 10);
+            }
+            document.getElementById('main-content').scrollTo({
+                top: 0
+            });
+
+            const backBtn = document.getElementById('back-btn-container');
+            const title = document.getElementById('header-page-title');
+
+            if (viewId === 'dashboard') {
+                backBtn.classList.add('hidden');
+                title.textContent = 'Admin Dashboard';
+            } else {
+                backBtn.classList.remove('hidden');
+                const viewTitles = {
+                    'manage-operators': 'Manage Operators',
+                    'manage-analysts': 'Manage Expert Analysts',
+                    'manage-cleanup': 'Manage Cleanup Teams',
+                    'manage-gov': 'Manage Government Users'
+                };
+                title.textContent = viewTitles[viewId] || 'Admin Dashboard';
+            }
+        }
+
+        // --- Survey Data Flow ---
+        async function loadSurveyData() {
+            globalSurveys = await fetchData(API.surveys);
+            loadSurveySummary();
+            loadSurveyTrend();
+            loadSurveyBreakdown();
+        }
+
+        function loadSurveySummary() {
+            const container = document.getElementById('survey-summary-cards');
+
+            if (globalSurveys === null) {
+                container.innerHTML = `<div class="col-span-full p-6 text-center text-rose-500 text-sm font-mono marine-card-no-hover">Unable to load data. Please try again.</div>`;
+                return;
+            }
+
+            const total = globalSurveys.length;
+            const active = globalSurveys.filter(s => (s.status || '').toUpperCase() === 'ACTIVE').length;
+            const completed = globalSurveys.filter(s => (s.status || '').toUpperCase() === 'COMPLETED').length;
+            const pending = globalSurveys.filter(s => (s.status || '').toUpperCase() === 'PENDING').length;
+            document.getElementById('hero-total').textContent = total;
+
+            const tile = (label, value, icon, tone) => `
+        <div class="marine-card-no-hover stat-tile">
+          <div class="stat-icon ${tone}"><span class="material-symbols-outlined">${icon}</span></div>
+          <div>
+            <div class="text-xs text-slate-500 font-medium">${label}</div>
+            <div class="text-3xl font-mono font-bold text-slate-900 leading-tight">${value}</div>
+          </div>
+        </div>`;
+
+            container.innerHTML =
+                tile('Total Surveys', total, 'assignment', 'tone-slate') +
+                tile('Active Surveys', active, 'sensors', 'tone-teal') +
+                tile('Completed Surveys', completed, 'task_alt', 'tone-emerald') +
+                tile('Pending Surveys', pending, 'hourglass_top', 'tone-amber');
+        }
+
+        function loadSurveyTrend() {
+            const emptyState = document.getElementById('trend-empty-state');
+            const canvas = document.getElementById('trendChart');
+            const period = document.getElementById('trend-period-select').value;
+
+            if (trendChartInst) {
+                trendChartInst.destroy();
+                trendChartInst = null;
+            }
+
+            if (globalSurveys === null) {
+                emptyState.textContent = "Unable to load data. Please try again.";
+                emptyState.classList.remove('hidden');
+                canvas.classList.add('hidden');
+                return;
+            }
+
+            // Filter surveys by period
+            const now = new Date();
+            let cutoff = new Date();
+            if (period === 'week') cutoff.setDate(now.getDate() - 7);
+            else if (period === 'month') cutoff.setMonth(now.getMonth() - 1);
+            else if (period === 'year') cutoff.setFullYear(now.getFullYear() - 1);
+
+            const filtered = globalSurveys.filter(s => {
+                if (!s.created_at) return false;
+                const d = new Date(s.created_at);
+                return d >= cutoff;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.textContent = "No survey history available for this period.";
+                emptyState.classList.remove('hidden');
+                canvas.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            canvas.classList.remove('hidden');
+
+            // Group by date for the chart
+            const datesMap = {};
+            filtered.forEach(s => {
+                const dateStr = s.created_at.split('T')[0];
+                if (!datesMap[dateStr]) datesMap[dateStr] = {
+                    total: 0,
+                    active: 0,
+                    completed: 0,
+                    pending: 0
+                };
+                datesMap[dateStr].total++;
+                const status = (s.status || '').toUpperCase();
+                if (status === 'ACTIVE') datesMap[dateStr].active++;
+                else if (status === 'COMPLETED') datesMap[dateStr].completed++;
+                else if (status === 'PENDING') datesMap[dateStr].pending++;
+            });
+
+            const sortedDates = Object.keys(datesMap).sort();
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 0, 280);
+            grad.addColorStop(0, 'rgba(100,116,139,0.18)');
+            grad.addColorStop(1, 'rgba(100,116,139,0)');
+            const line = (label, key, color, extra) => Object.assign({
+                label,
+                data: sortedDates.map(d => datesMap[d][key]),
+                borderColor: color,
+                backgroundColor: color,
+                tension: 0.35,
+                borderWidth: 2.5,
+                pointRadius: 3,
+                pointHoverRadius: 6
+            }, extra || {});
+
+            trendChartInst = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [
+                        line('Total', 'total', '#64748b', {
+                            fill: true,
+                            backgroundColor: grad,
+                            borderDash: [5, 4]
+                        }),
+                        line('Active', 'active', '#0d9488'),
+                        line('Completed', 'completed', '#059669'),
+                        line('Pending', 'pending', '#d97706')
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: {
+                                    family: 'Space Grotesk'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#eef2f6'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    family: 'Space Grotesk'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Space Grotesk'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadSurveyBreakdown() {
+            if (breakdownPurposeChartInst) breakdownPurposeChartInst.destroy();
+            if (breakdownRegionChartInst) breakdownRegionChartInst.destroy();
+
+            const pEmpty = document.getElementById('purpose-empty-state');
+            const rEmpty = document.getElementById('region-empty-state');
+            const pCanvas = document.getElementById('breakdownPurposeChart');
+            const rCanvas = document.getElementById('breakdownRegionChart');
+
+            if (globalSurveys === null) {
+                pEmpty.textContent = rEmpty.textContent = "Unable to load data. Please try again.";
+                pEmpty.classList.remove('hidden');
+                rEmpty.classList.remove('hidden');
+                pCanvas.classList.add('hidden');
+                rCanvas.classList.add('hidden');
+                return;
+            }
+
+            if (globalSurveys.length === 0) {
+                pEmpty.textContent = "No survey purpose data available.";
+                rEmpty.textContent = "No regional survey data available.";
+                pEmpty.classList.remove('hidden');
+                rEmpty.classList.remove('hidden');
+                pCanvas.classList.add('hidden');
+                rCanvas.classList.add('hidden');
+                return;
+            }
+
+            const purposeMap = {};
+            let hasPurpose = false;
+            const regionMap = {};
+            let hasRegion = false;
+
+            globalSurveys.forEach(s => {
+                if (s.purpose) {
+                    hasPurpose = true;
+                    purposeMap[s.purpose] = (purposeMap[s.purpose] || 0) + 1;
+                }
+                if (s.region) {
+                    hasRegion = true;
+                    regionMap[s.region] = (regionMap[s.region] || 0) + 1;
+                }
+            });
+
+            if (!hasPurpose) {
+                pEmpty.textContent = "No survey purpose data available.";
+                pEmpty.classList.remove('hidden');
+                pCanvas.classList.add('hidden');
+            } else {
+                pEmpty.classList.add('hidden');
+                pCanvas.classList.remove('hidden');
+                breakdownPurposeChartInst = new Chart(pCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(purposeMap),
+                        datasets: [{
+                            data: Object.values(purposeMap),
+                            backgroundColor: PALETTE,
+                            borderColor: '#fff',
+                            borderWidth: 3,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '66%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 8,
+                                    font: {
+                                        family: 'Space Grotesk',
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (!hasRegion) {
+                rEmpty.textContent = "No regional survey data available.";
+                rEmpty.classList.remove('hidden');
+                rCanvas.classList.add('hidden');
+            } else {
+                rEmpty.classList.add('hidden');
+                rCanvas.classList.remove('hidden');
+                breakdownRegionChartInst = new Chart(rCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(regionMap),
+                        datasets: [{
+                            label: 'Surveys',
+                            data: Object.values(regionMap),
+                            backgroundColor: '#14b8a6',
+                            hoverBackgroundColor: '#0d9488',
+                            borderRadius: 8,
+                            maxBarThickness: 38
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#eef2f6'
+                                },
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        family: 'Space Grotesk'
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        family: 'Space Grotesk',
+                                        size: 10
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // --- Users Data Flow ---
+        async function loadUsersData() {
+            globalUsers = await fetchData(API.users);
+            loadOperators();
+            loadAnalysts();
+            loadGovernmentUsers();
+        }
+
+        function buildStatCards(containerId, stats) {
+            const c = document.getElementById(containerId);
+            if (!c) return;
+            const tones = ['tone-slate', 'tone-teal', 'tone-amber'];
+            const icons = ['groups', 'check_circle', 'pause_circle'];
+            c.innerHTML = stats.map((st, i) => `
+        <div class="marine-card-no-hover stat-tile">
+          <div class="stat-icon ${tones[i % 3]}"><span class="material-symbols-outlined">${icons[i % 3]}</span></div>
+          <div>
+            <div class="text-xs text-slate-500 font-medium">${st.label}</div>
+            <div class="text-2xl font-mono font-bold text-slate-900 leading-tight">${st.value}</div>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function buildFilters(containerId, filters) {
+            const c = document.getElementById(containerId);
+            if (!c || filters.length === 0) return;
+            c.innerHTML = '<span class="material-symbols-outlined text-slate-400 text-[18px]">filter_list</span>' + filters.map(f => `
+        <select>
+          <option value="">${f.label}</option>
+          ${f.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+        </select>
+      `).join('');
+    }
+
+    function getUnique(arr, key) {
+      return [...new Set(arr.map(x => x[key]).filter(x => x))];
+    }
+
+    function loadOperators() {
+      const tbody = document.getElementById('operators-tbody');
+      if (globalUsers === null) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-500">Unable to load data. Please try again.</td></tr>`;
+        return;
+      }
+
+      const ops = globalUsers.filter(u => u.role === 'survey_operator');
+      const active = ops.filter(u => (u.status || '').toLowerCase() === 'active').length;
+      setCount('count-operators', `${ops.length} total`);
+
+      buildStatCards('operators-stats', [
+        { label: 'Total Operators', value: ops.length },
+        { label: 'Active Operators', value: active },
+        { label: 'Inactive Operators', value: ops.length - active }
+      ]);
+
+      if (ops.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No operators available.</td></tr>`;
+        return;
+      }
+
+      buildFilters('operators-filters', [
+        { label: 'Status', options: getUnique(ops, 'status') },
+        { label: 'Base', options: getUnique(ops, 'base') },
+        { label: 'Region', options: getUnique(ops, 'region') }
+      ]);
+
+      tbody.innerHTML = ops.map(u => `
+        <tr>
+          <td>${nameCell(u.full_name)}</td>
+          <td>${u.base || '-'}</td>
+          <td>${u.vessel || '-'}</td>
+          <td>${u.surveys || '-'}</td>
+          <td>${u.images || '-'}</td>
+          <td>${statusPill(u.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function loadAnalysts() {
+      const tbody = document.getElementById('analysts-tbody');
+      if (globalUsers === null) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-500">Unable to load data. Please try again.</td></tr>`;
+        return;
+      }
+
+      const analysts = globalUsers.filter(u => u.role === 'sonar_analyst' || u.role === 'marine_portal');
+      const active = analysts.filter(u => (u.status || '').toLowerCase() === 'active').length;
+      setCount('count-analysts', `${analysts.length} total`);
+
+      buildStatCards('analysts-stats', [
+        { label: 'Total Analysts', value: analysts.length },
+        { label: 'Active Analysts', value: active },
+        { label: 'Inactive Analysts', value: analysts.length - active }
+      ]);
+
+      if (analysts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No expert analysts available.</td></tr>`;
+        return;
+      }
+
+      buildFilters('analysts-filters', [
+        { label: 'Status', options: getUnique(analysts, 'status') },
+        { label: 'Base', options: getUnique(analysts, 'base') },
+        { label: 'Region', options: getUnique(analysts, 'region') }
+      ]);
+
+      tbody.innerHTML = analysts.map(u => `
+        <tr>
+          <td>${nameCell(u.full_name)}</td>
+          <td>${u.base || '-'}</td>
+          <td>${u.vessel || '-'}</td>
+          <td>${u.surveys || '-'}</td>
+          <td>${u.images || '-'}</td>
+          <td>${statusPill(u.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function loadGovernmentUsers() {
+      const tbody = document.getElementById('gov-tbody');
+      if (globalUsers === null) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-rose-500">Unable to load data. Please try again.</td></tr>`;
+        return;
+      }
+
+      const govUsers = globalUsers.filter(u => u.role === 'government_portal');
+      const active = govUsers.filter(u => (u.status || '').toLowerCase() === 'active').length;
+      setCount('count-gov', `${govUsers.length} total`);
+
+      buildStatCards('gov-stats', [
+        { label: 'Total Users', value: govUsers.length },
+        { label: 'Active Users', value: active },
+        { label: 'Pending Users', value: govUsers.filter(u => (u.status || '').toLowerCase() === 'pending').length }
+      ]);
+
+      if (govUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No government users available.</td></tr>`;
+        return;
+      }
+
+      buildFilters('gov-filters', [
+        { label: 'Department', options: getUnique(govUsers, 'department') },
+        { label: 'Region/Jurisdiction', options: getUnique(govUsers, 'region') },
+        { label: 'Status', options: getUnique(govUsers, 'status') }
+      ]);
+
+      tbody.innerHTML = govUsers.map(u => `
+        <tr>
+          <td>${nameCell(u.full_name)}</td>
+          <td>${u.department || '-'}</td>
+          <td>${u.region || '-'}</td>
+          <td>${u.access || '-'}</td>
+          <td>${statusPill(u.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // --- Cleanup Teams Data Flow ---
+    async function loadCleanupTeams() {
+      const data = await fetchData(API.cleanupTeams);
+      const tbody = document.getElementById('cleanup-tbody');
+
+      if (data === null) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-500">Unable to load data. Please try again.</td></tr>`;
+        return;
+      }
+
+      setCount('count-cleanup', `${data.length} total`);
+
+      if (data.length === 0) {
+        buildStatCards('cleanup-stats', [{ label: 'Total Teams', value: 0 }, { label: 'Active Teams', value: 0 }, { label: 'Inactive/Idle Teams', value: 0 }]);
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No cleanup teams available.</td></tr>`;
+        return;
+      }
+
+      const active = data.filter(t => (t.status || '').toLowerCase() === 'active').length;
+      buildStatCards('cleanup-stats', [
+        { label: 'Total Teams', value: data.length },
+        { label: 'Active Teams', value: active },
+        { label: 'Inactive/Idle Teams', value: data.length - active }
+      ]);
+
+      buildFilters('cleanup-filters', [
+        { label: 'Region', options: getUnique(data, 'region') },
+        { label: 'Status', options: getUnique(data, 'status') }
+      ]);
+
+      tbody.innerHTML = data.map(t => `
+        <tr>
+          <td>${nameCell(t.team_name)}</td>
+          <td>${t.region || '-'}</td>
+          <td>${t.members || '-'}</td>
+          <td>${t.surveys || '-'}</td>
+          <td>${t.completed || '-'}</td>
+          <td>${statusPill(t.status)}</td>
+        </tr>
+      `).join('');
+    }
+    </script>
+    <script src="/js/chatbot.js" defer></script>
+</body>
+
+</html>
